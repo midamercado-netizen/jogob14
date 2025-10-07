@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo do Bicho - Sistema de Sorteio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            color: #ffcc00;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+
+        .betting-panel {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(255, 204, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        @media (min-width: 480px) {
+            .player-info {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+
+        .balance {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .bet-amount {
+            margin-bottom: 15px;
+        }
+
+        .bet-amount input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            margin-top: 5px;
+        }
+
+        .bet-type {
+            margin-bottom: 15px;
+        }
+
+        .bet-type h3 {
+            margin-bottom: 8px;
+            color: #ffcc00;
+            font-size: 1.1rem;
+        }
+
+        .bet-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        @media (min-width: 480px) {
+            .bet-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .bet-option {
+            padding: 12px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            font-size: 0.9rem;
+        }
+
+        .bet-option.selected {
+            background: #ffcc00;
+            color: #000;
+            font-weight: bold;
+            border-color: #fff;
+        }
+
+        .number-selection {
+            margin-bottom: 15px;
+        }
+
+        .number-selection h3 {
+            margin-bottom: 8px;
+            color: #ffcc00;
+            font-size: 1.1rem;
+        }
+
+        .number-input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+        }
+
+        .animal-selection {
+            margin-bottom: 15px;
+        }
+
+        .animal-selection h3 {
+            margin-bottom: 8px;
+            color: #ffcc00;
+            font-size: 1.1rem;
+        }
+
+        .animals-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        @media (min-width: 480px) {
+            .animals-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .animal {
+            padding: 10px 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            font-size: 0.85rem;
+        }
+
+        .animal.selected {
+            background: #ffcc00;
+            color: #000;
+            font-weight: bold;
+            border-color: #fff;
+        }
+
+        .animal-number {
+            font-size: 0.7rem;
+            color: #aaa;
+            margin-top: 3px;
+        }
+
+        .game-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        @media (min-width: 480px) {
+            .game-controls {
+                flex-direction: row;
+            }
+        }
+
+        button {
+            padding: 14px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .place-bet {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .place-bet:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .clear-bet {
+            background: #f44336;
+            color: white;
+        }
+
+        .sorteio-area {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px 15px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .sorteio-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px 15px;
+            border-radius: 12px;
+            border: 3px solid #ffcc00;
+            margin: 15px 0;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .numero-sorteado {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 0 20px rgba(255, 204, 0, 0.5);
+            margin: 15px 0;
+            animation: pulse 2s infinite;
+            letter-spacing: 3px;
+        }
+
+        @media (min-width: 480px) {
+            .numero-sorteado {
+                font-size: 3rem;
+            }
+        }
+
+        .animal-sorteado {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+
+        .dezena-info {
+            font-size: 1rem;
+            color: #ffcc00;
+            margin-top: 8px;
+        }
+
+        .spin-button {
+            background: #ffcc00;
+            color: #000;
+            font-size: 1.1rem;
+            padding: 14px 30px;
+            margin-top: 8px;
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .spin-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .result-display {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255, 204, 0, 0.2);
+            border-radius: 8px;
+            text-align: center;
+            min-height: 100px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .history-panel {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .history-panel h2 {
+            margin-bottom: 12px;
+            color: #ffcc00;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .history-item {
+            padding: 8px 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        @media (min-width: 480px) {
+            .history-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .win {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .loss {
+            color: #f44336;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        .message {
+            padding: 8px;
+            margin: 8px 0;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .message.win {
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid #4CAF50;
+        }
+
+        .message.loss {
+            background: rgba(244, 67, 54, 0.3);
+            border: 1px solid #f44336;
+        }
+
+        .message.info {
+            background: rgba(255, 204, 0, 0.3);
+            border: 1px solid #ffcc00;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .sorteio-animacao {
+            animation: sorteio 0.5s ease-in-out;
+        }
+
+        @keyframes sorteio {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .explicacao {
+            background: rgba(255, 204, 0, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 8px 0;
+            border-left: 3px solid #ffcc00;
+            font-size: 0.8rem;
+        }
+
+        .explicacao h4 {
+            color: #ffcc00;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Scroll personalizado */
+        .animals-grid::-webkit-scrollbar,
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .animals-grid::-webkit-scrollbar-track,
+        .history-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .animals-grid::-webkit-scrollbar-thumb,
+        .history-list::-webkit-scrollbar-thumb {
+            background: #ffcc00;
+            border-radius: 3px;
+        }
+
+        /* Melhorias de toque para mobile */
+        @media (max-width: 767px) {
+            .bet-option, .animal, button {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .animal {
+                flex-direction: column;
+            }
+        }
+
+        /* Ajustes para telas muito pequenas */
+        @media (max-width: 360px) {
+            .animals-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .numero-sorteado {
+                font-size: 2rem;
+                letter-spacing: 2px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1> Jogo do Bicho Roger Play12</h1>
+            <p>Sistema de entretenimento</p>
+        </header>
+
+        <div class="game-area">
+            <div class="betting-panel">
+                <div class="player-info">
+                    <div class="balance">Saldo: R$ <span id="balance">500,00</span></div>
+                    <div class="current-bet">Aposta: R$ <span id="current-bet">0,00</span></div>
+                </div>
+
+                <div class="bet-amount">
+                    <h3>Valor da Aposta (R$)</h3>
+                    <input type="number" id="bet-value" min="1" max="100" value="10" step="1">
+                </div>
+
+                <div class="bet-type">
+                    <h3>Tipo de Aposta</h3>
+                    <div class="bet-options">
+                        <div class="bet-option" data-type="animal">Bicho (15x)</div>
+                        <div class="bet-option" data-type="ten">Dezena (50x)</div>
+                        <div class="bet-option" data-type="hundred">Centena (500x)</div>
+                        <div class="bet-option" data-type="thousand">Milhar (4000x)</div>
+                    </div>
+                </div>
+
+                <div class="number-selection" id="number-selection" style="display: none;">
+                    <h3>Escolha o Número</h3>
+                    <input type="number" id="number-input" class="number-input" min="0" max="9999" placeholder="0000 a 9999">
+                    <div class="explicacao">
+                        <h4>Como funciona:</h4>
+                        <p><strong>Bicho:</strong> Acertar o animal pelos 2 últimos dígitos</p>
+                        <p><strong>Dezena:</strong> Acertar os 2 últimos dígitos</p>
+                        <p><strong>Centena:</strong> Acertar os 3 últimos dígitos</p>
+                        <p><strong>Milhar:</strong> Acertar os 4 dígitos</p>
+                    </div>
+                </div>
+
+                <div class="animal-selection" id="animal-selection" style="display: none;">
+                    <h3>Escolha o Bicho</h3>
+                    <div class="animals-grid" id="animals-grid">
+                        <!-- Os animais serão inseridos via JavaScript -->
+                    </div>
+                </div>
+
+                <div id="message-area"></div>
+
+                <div class="game-controls">
+                    <button class="place-bet" id="place-bet" disabled>Fazer Aposta</button>
+                    <button class="clear-bet" id="clear-bet">Limpar</button>
+                </div>
+            </div>
+
+            <div class="sorteio-area">
+                <h2> Área de Sorteio</h2>
+                <div class="sorteio-container">
+                    <h3>Número Sorteado:</h3>
+                    <div class="numero-sorteado" id="numero-sorteado">0000</div>
+                    <div class="animal-sorteado" id="animal-sorteado">-</div>
+                    <div class="dezena-info" id="dezena-info">Dezena: -</div>
+                </div>
+
+                <div class="result-display">
+                    <div id="last-result">Faça sua aposta e clique em Sortear!</div>
+                </div>
+
+                <button class="spin-button" id="spin-button" disabled>Sortear Número</button>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <h2>Histórico de Resultados</h2>
+            <div class="history-list" id="history-list">
+                <!-- Histórico será inserido via JavaScript -->
+            </div>
+        </div>
+
+        <footer>
+            <p>Este é um jogo educativo para fins de entretenimento. Roger Play 2025.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Dados do jogo CORRETOS - baseados nos 2 últimos dígitos
+        const animals = [
+            { id: 1, name: "Avestruz", dezenas: ["01", "02", "03", "04"] },
+            { id: 2, name: "Águia", dezenas: ["05", "06", "07", "08"] },
+            { id: 3, name: "Burro", dezenas: ["09", "10", "11", "12"] },
+            { id: 4, name: "Borboleta", dezenas: ["13", "14", "15", "16"] },
+            { id: 5, name: "Cachorro", dezenas: ["17", "18", "19", "20"] },
+            { id: 6, name: "Cabra", dezenas: ["21", "22", "23", "24"] },
+            { id: 7, name: "Carneiro", dezenas: ["25", "26", "27", "28"] },
+            { id: 8, name: "Camelo", dezenas: ["29", "30", "31", "32"] },
+            { id: 9, name: "Cobra", dezenas: ["33", "34", "35", "36"] },
+            { id: 10, name: "Coelho", dezenas: ["37", "38", "39", "40"] },
+            { id: 11, name: "Cavalo", dezenas: ["41", "42", "43", "44"] },
+            { id: 12, name: "Elefante", dezenas: ["45", "46", "47", "48"] },
+            { id: 13, name: "Galo", dezenas: ["49", "50", "51", "52"] },
+            { id: 14, name: "Gato", dezenas: ["53", "54", "55", "56"] },
+            { id: 15, name: "Jacaré", dezenas: ["57", "58", "59", "60"] },
+            { id: 16, name: "Leão", dezenas: ["61", "62", "63", "64"] },
+            { id: 17, name: "Macaco", dezenas: ["65", "66", "67", "68"] },
+            { id: 18, name: "Porco", dezenas: ["69", "70", "71", "72"] },
+            { id: 19, name: "Pavão", dezenas: ["73", "74", "75", "76"] },
+            { id: 20, name: "Peru", dezenas: ["77", "78", "79", "80"] },
+            { id: 21, name: "Touro", dezenas: ["81", "82", "83", "84"] },
+            { id: 22, name: "Tigre", dezenas: ["85", "86", "87", "88"] },
+            { id: 23, name: "Urso", dezenas: ["89", "90", "91", "92"] },
+            { id: 24, name: "Veado", dezenas: ["93", "94", "95", "96"] },
+            { id: 25, name: "Vaca", dezenas: ["97", "98", "99", "00"] }
+        ];
+
+        // Estado do jogo
+        let balance = 100.00;
+        let currentBet = null;
+        let gameHistory = [];
+        let isSorting = false;
+
+        // Elementos DOM
+        const balanceElement = document.getElementById('balance');
+        const currentBetElement = document.getElementById('current-bet');
+        const betValueElement = document.getElementById('bet-value');
+        const betOptions = document.querySelectorAll('.bet-option');
+        const numberSelection = document.getElementById('number-selection');
+        const numberInput = document.getElementById('number-input');
+        const animalSelection = document.getElementById('animal-selection');
+        const animalsGrid = document.getElementById('animals-grid');
+        const placeBetButton = document.getElementById('place-bet');
+        const clearBetButton = document.getElementById('clear-bet');
+        const spinButton = document.getElementById('spin-button');
+        const numeroSorteadoElement = document.getElementById('numero-sorteado');
+        const animalSorteadoElement = document.getElementById('animal-sorteado');
+        const dezenaInfoElement = document.getElementById('dezena-info');
+        const lastResultElement = document.getElementById('last-result');
+        const historyList = document.getElementById('history-list');
+        const messageArea = document.getElementById('message-area');
+
+        // Inicialização
+        function init() {
+            renderAnimalsGrid();
+            setupEventListeners();
+            updateUI();
+        }
+
+        // Renderizar grade de animais para seleção
+        function renderAnimalsGrid() {
+            animalsGrid.innerHTML = '';
+            animals.forEach(animal => {
+                const animalElement = document.createElement('div');
+                animalElement.className = 'animal';
+                animalElement.dataset.id = animal.id;
+                animalElement.innerHTML = `
+                    <div>${animal.name}</div>
+                    <div class="animal-number">${animal.dezenas.join(', ')}</div>
+                `;
+                animalsGrid.appendChild(animalElement);
+            });
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Opções de aposta
+            betOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    if (isSorting) return;
+                    
+                    betOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    
+                    const betType = option.dataset.type;
+                    currentBet = { 
+                        type: betType, 
+                        value: parseFloat(betValueElement.value) || 0 
+                    };
+                    
+                    // Mostrar seleção apropriada
+                    if (betType === 'animal') {
+                        numberSelection.style.display = 'none';
+                        animalSelection.style.display = 'block';
+                        currentBet.number = null;
+                        numberInput.value = '';
+                    } else {
+                        numberSelection.style.display = 'block';
+                        animalSelection.style.display = 'none';
+                        currentBet.animal = null;
+                        
+                        // Limpar seleção de animais
+                        document.querySelectorAll('.animal').forEach(a => a.classList.remove('selected'));
+                        
+                        // Configurar limites de entrada
+                        if (betType === 'ten') {
+                            numberInput.min = 0;
+                            numberInput.max = 99;
+                            numberInput.placeholder = '00 a 99 (2 últimos dígitos)';
+                        } else if (betType === 'hundred') {
+                            numberInput.min = 0;
+                            numberInput.max = 999;
+                            numberInput.placeholder = '000 a 999 (3 últimos dígitos)';
+                        } else if (betType === 'thousand') {
+                            numberInput.min = 0;
+                            numberInput.max = 9999;
+                            numberInput.placeholder = '0000 a 9999 (4 dígitos)';
+                        }
+                    }
+                    
+                    updateUI();
+                });
+            });
+            
+            // Entrada de número
+            numberInput.addEventListener('input', () => {
+                if (currentBet && !isSorting) {
+                    let value = parseInt(numberInput.value) || null;
+                    
+                    // Garantir que o número tenha o número correto de dígitos
+                    if (value !== null) {
+                        if (currentBet.type === 'ten' && value < 10) {
+                            value = parseInt(value.toString().padStart(2, '0'));
+                        } else if (currentBet.type === 'hundred' && value < 100) {
+                            value = parseInt(value.toString().padStart(3, '0'));
+                        } else if (currentBet.type === 'thousand' && value < 1000) {
+                            value = parseInt(value.toString().padStart(4, '0'));
+                        }
+                        numberInput.value = value;
+                    }
+                    
+                    currentBet.number = value;
+                    updateUI();
+                }
+            });
+            
+            // Seleção de animal
+            animalsGrid.addEventListener('click', (e) => {
+                if (isSorting) return;
+                
+                const animalElement = e.target.closest('.animal');
+                if (animalElement) {
+                    const animalId = parseInt(animalElement.dataset.id);
+                    
+                    document.querySelectorAll('.animal').forEach(a => a.classList.remove('selected'));
+                    animalElement.classList.add('selected');
+                    
+                    if (currentBet) {
+                        currentBet.animal = animalId;
+                        currentBet.number = null;
+                        numberInput.value = '';
+                        updateUI();
+                    }
+                }
+            });
+            
+            // Botão de fazer aposta
+            placeBetButton.addEventListener('click', () => {
+                if (isSorting) return;
+                
+                if (currentBet && currentBet.value > 0 && currentBet.value <= balance) {
+                    if ((currentBet.type === 'animal' && currentBet.animal) || 
+                        (currentBet.type !== 'animal' && currentBet.number !== null)) {
+                        
+                        balance -= currentBet.value;
+                        spinButton.disabled = false;
+                        placeBetButton.disabled = true;
+                        showMessage('Aposta confirmada! Clique em "Sortear Número"', 'info');
+                        updateUI();
+                    } else {
+                        showMessage('Selecione um número ou bicho para apostar!', 'loss');
+                    }
+                }
+            });
+            
+            // Botão de limpar aposta
+            clearBetButton.addEventListener('click', () => {
+                if (!isSorting) {
+                    resetBet();
+                }
+            });
+            
+            // Botão de sortear número
+            spinButton.addEventListener('click', sortearNumero);
+            
+            // Atualizar valor da aposta
+            betValueElement.addEventListener('input', () => {
+                if (currentBet && !isSorting) {
+                    const newValue = parseFloat(betValueElement.value) || 0;
+                    if (newValue > 0 && newValue <= 100) {
+                        currentBet.value = newValue;
+                    } else {
+                        betValueElement.value = currentBet.value;
+                    }
+                    updateUI();
+                }
+            });
+        }
+
+        // Mostrar mensagem
+        function showMessage(text, type) {
+            messageArea.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 3000);
+        }
+
+        // Atualizar interface do usuário
+        function updateUI() {
+            balanceElement.textContent = balance.toFixed(2).replace('.', ',');
+            
+            if (currentBet) {
+                currentBetElement.textContent = currentBet.value.toFixed(2).replace('.', ',');
+                
+                // Verificar se a aposta é válida
+                const isValid = currentBet.value > 0 && 
+                    currentBet.value <= balance && 
+                    ((currentBet.type === 'animal' && currentBet.animal) || 
+                     (currentBet.type !== 'animal' && currentBet.number !== null));
+                
+                placeBetButton.disabled = !isValid || isSorting;
+            } else {
+                currentBetElement.textContent = '0,00';
+                placeBetButton.disabled = true;
+            }
+            
+            spinButton.disabled = !currentBet || isSorting;
+            
+            // Atualizar histórico
+            renderHistory();
+        }
+
+        // Resetar aposta
+        function resetBet() {
+            currentBet = null;
+            betOptions.forEach(opt => opt.classList.remove('selected'));
+            numberSelection.style.display = 'none';
+            animalSelection.style.display = 'none';
+            numberInput.value = '';
+            document.querySelectorAll('.animal').forEach(a => a.classList.remove('selected'));
+            spinButton.disabled = true;
+            placeBetButton.disabled = true;
+            showMessage('Aposta limpa!', 'info');
+            updateUI();
+        }
+
+        // Sortear número de 4 dígitos
+        function sortearNumero() {
+            if (!currentBet || isSorting) return;
+            
+            isSorting = true;
+            spinButton.disabled = true;
+            
+            // Animação de contagem regressiva
+            let count = 3;
+            const countdown = setInterval(() => {
+                numeroSorteadoElement.textContent = "????";
+                animalSorteadoElement.textContent = "Sorteando...";
+                dezenaInfoElement.textContent = "Dezena: -";
+                count--;
+                
+                if (count < 0) {
+                    clearInterval(countdown);
+                    
+                    // Sortear número final de 4 dígitos (0000 a 9999)
+                    const numeroSorteado = Math.floor(Math.random() * 10000);
+                    const numeroFormatado = numeroSorteado.toString().padStart(4, '0');
+                    
+                    // Determinar o bicho pelos 2 ÚLTIMOS dígitos (CORREÇÃO)
+                    const dezena = numeroFormatado.slice(2); // Pega os 2 últimos dígitos
+                    const animalSorteado = getAnimalByDezena(dezena);
+                    
+                    // Mostrar resultado
+                    numeroSorteadoElement.textContent = numeroFormatado;
+                    animalSorteadoElement.textContent = animalSorteado.name;
+                    dezenaInfoElement.textContent = `Dezena: ${dezena}`;
+                    numeroSorteadoElement.classList.add('sorteio-animacao');
+                    
+                    // Verificar resultado
+                    setTimeout(() => {
+                        checkWin(numeroFormatado, animalSorteado, dezena);
+                        isSorting = false;
+                        resetBet();
+                    }, 1000);
+                }
+            }, 300);
+        }
+
+        // Obter animal pela DEZENA (2 últimos dígitos) - CORREÇÃO
+        function getAnimalByDezena(dezena) {
+            return animals.find(animal => 
+                animal.dezenas.includes(dezena)
+            ) || animals[24]; // Vaca como fallback (inclui "00")
+        }
+
+        // Verificar se ganhou
+        function checkWin(numeroSorteado, animalSorteado, dezenaSorteada) {
+            if (!currentBet) return;
+            
+            let win = false;
+            let multiplier = 0;
+            
+            switch (currentBet.type) {
+                case 'animal':
+                    // Para aposta em bicho, verifica se o animal apostado corresponde ao animal sorteado
+                    win = currentBet.animal === animalSorteado.id;
+                    multiplier = 18;
+                    break;
+                case 'ten':
+                    // Para dezena, verifica os 2 últimos dígitos
+                    const dezenaAposta = currentBet.number.toString().padStart(2, '0');
+                    win = dezenaAposta === dezenaSorteada;
+                    multiplier = 60;
+                    break;
+                case 'hundred':
+                    // Para centena, verifica os 3 últimos dígitos
+                    const centenaSorteada = numeroSorteado.slice(1);
+                    const centenaAposta = currentBet.number.toString().padStart(3, '0');
+                    win = centenaAposta === centenaSorteada;
+                    multiplier = 600;
+                    break;
+                case 'thousand':
+                    // Para milhar, verifica os 4 dígitos
+                    const milharAposta = currentBet.number.toString().padStart(4, '0');
+                    win = milharAposta === numeroSorteado;
+                    multiplier = 4000;
+                    break;
+            }
+            
+            // Adicionar ao histórico
+            gameHistory.unshift({
+                numero: numeroSorteado,
+                animal: animalSorteado.name,
+                dezena: dezenaSorteada,
+                ganhou: win,
+                premio: win ? currentBet.value * multiplier : 0,
+                timestamp: new Date(),
+                tipoAposta: currentBet.type
+            });
+            
+            // Manter apenas os últimos 10 resultados
+            if (gameHistory.length > 10) {
+                gameHistory.pop();
+            }
+            
+            if (win) {
+                const winAmount = currentBet.value * multiplier;
+                balance += winAmount;
+                lastResultElement.innerHTML = `<span class="win">🎉 Você ganhou R$ ${winAmount.toFixed(2).replace('.', ',')}! 🎉</span>`;
+                showMessage(`Parabéns! Você ganhou R$ ${winAmount.toFixed(2).replace('.', ',')}!`, 'win');
+            } else {
+                lastResultElement.innerHTML = `<span class="loss">😔 Não foi desta vez. Tente novamente!</span>`;
+                showMessage('Não foi desta vez. Tente novamente!', 'loss');
+            }
+            
+            updateUI();
+        }
+
+        // Renderizar histórico
+        function renderHistory() {
+            historyList.innerHTML = '';
+            
+            if (gameHistory.length === 0) {
+                historyList.innerHTML = '<div class="history-item">Nenhum resultado ainda</div>';
+                return;
+            }
+            
+            gameHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                const time = item.timestamp.toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                const resultado = item.ganhou ? 
+                    `<span class="win">GANHOU R$ ${item.premio.toFixed(2).replace('.', ',')}</span>` : 
+                    `<span class="loss">PERDEU</span>`;
+                
+                historyItem.innerHTML = `
+                    <div>${time}</div>
+                    <div><strong>${item.numero}</strong> - ${item.animal}</div>
+                    <div>${resultado}</div>
+                `;
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // Inicializar o jogo
+        init();
+    </script>
+</body>
+</html>
